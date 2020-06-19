@@ -12,7 +12,10 @@ lichess_twitch_bot.py
 
 import logging
 from requests import get
+from pathlib import Path
 from irc.bot import SingleServerIRCBot
+
+LOG = logging.getLogger(f"tlb.{Path(__file__).stem}")
 
 
 class LichessTwitchBot(SingleServerIRCBot):
@@ -31,20 +34,20 @@ class LichessTwitchBot(SingleServerIRCBot):
         }
         resp = get(url, headers=headers).json()
         self.channel_id = resp["users"][0]["_id"]
-        print("init 1 finished")
+        LOG.debug("init 1 finished")
 
         super().__init__(
             [(self.HOST, self.PORT, f"oauth:{self.TOKEN}")], self.USERNAME, self.USERNAME,
         )
-        print("init 2 finished")
+        LOG.debug("init 2 finished")
 
     def on_welcome(self, cxn, event):
         for req in ("membership", "tags", "commands"):
             cxn.cap("REQ", f":twitch.tv/{req}")
-        print("welcome finished")
+        LOG.debug("welcome finished")
 
         cxn.join(self.CHANNEL)
-        print("joined channel")
+        LOG.debug("joined channel")
         self.send_message("Now online.")
 
     def on_pubmsg(self, cxn, event):
@@ -52,8 +55,8 @@ class LichessTwitchBot(SingleServerIRCBot):
         user = {"name": tags["display-name"], "id": tags["user-id"]}
         message = event.arguments[0]
 
-        print(f"Message from {user['name']}: {message}")
+        LOG.info(f"Message from {user['name']}: {message}")
 
     def send_message(self, message):
-        print("sending message")
+        LOG.debug("sending message")
         self.connection.privmsg(self.CHANNEL, message)

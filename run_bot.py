@@ -6,11 +6,43 @@ run_bot.py
 """
 
 import sys
+import logging
 import argparse as ap
 from pathlib import Path
 import yaml
 
 from lichess_twitch_bot import LichessTwitchBot
+
+LOG = logging.getLogger(f"tlb.{Path(__file__).stem}")
+
+
+def setup_logging(logging_level):
+    """
+    Setup logging
+    """
+    # Logging to file
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+        datefmt="%y-%m-%d %H:%M",
+        filename=f"{__file__}.log",
+        filemode="w",
+    )
+    # Logging to console
+    console = logging.StreamHandler()
+    if logging_level == 1:
+        console_level = logging.WARNING
+    elif logging_level == 2:
+        console_level = logging.INFO
+    elif logging_level == 3:
+        console_level = logging.DEBUG
+    else:
+        console_level = logging.ERROR
+    console.setLevel(console_level)
+    console.setFormatter(logging.Formatter("%(name)-12s: %(levelname)-8s %(message)s"))
+    logging.getLogger("").addHandler(console)
+
+    LOG.debug("Logger setup")
 
 
 def parse_args(main_args):
@@ -19,9 +51,17 @@ def parse_args(main_args):
     """
     parser = ap.ArgumentParser(description="Starts a Lichess Twitch Bot")
     parser.add_argument("-c", "--configuration", type=str, help="configuration file", required=True)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        required=False,
+        action="count",
+        help="Each v increases the console logging level [v/vv/vvv]",
+    )
     args = parser.parse_args(main_args[1:])
 
     return args
+
 
 def load_configuration(configuration_file):
     """
@@ -34,6 +74,8 @@ def load_configuration(configuration_file):
         except yaml.YAMLError as exc:
             print(exc)
 
+    LOG.debug("Loaded configuration")
+
     return configuration
 
 
@@ -41,8 +83,9 @@ def main(main_args):
     """
     Main program function.
     """
-    # Basic setup
+    # Base setup
     args = parse_args(main_args)
+    setup_logging(args.verbose)
     configuration = load_configuration(args.configuration)
 
     username = configuration["twitch"]["username"]
