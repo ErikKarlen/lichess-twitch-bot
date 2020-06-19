@@ -5,6 +5,7 @@ from urllib3.exceptions import ProtocolError
 
 try:
     from http.client import RemoteDisconnected
+
     # New in version 3.5: Previously, BadStatusLine('') was raised.
 except ImportError:
     from http.client import BadStatusLine as RemoteDisconnected
@@ -23,17 +24,14 @@ ENDPOINTS = {
     "accept": "/api/challenge/{}/accept",
     "decline": "/api/challenge/{}/decline",
     "upgrade": "/api/bot/account/upgrade",
-    "resign": "/api/bot/game/{}/resign"
+    "resign": "/api/bot/game/{}/resign",
 }
 
 # docs: https://lichess.org/api
-class Lichess():
-
+class Lichess:
     def __init__(self, token, url, version):
         self.version = version
-        self.header = {
-            "Authorization": "Bearer {}".format(token)
-        }
+        self.header = {"Authorization": "Bearer {}".format(token)}
         self.baseUrl = url
         self.session = requests.Session()
         self.session.headers.update(self.header)
@@ -42,22 +40,26 @@ class Lichess():
     def is_final(exception):
         return isinstance(exception, HTTPError) and exception.response.status_code < 500
 
-    @backoff.on_exception(backoff.constant,
+    @backoff.on_exception(
+        backoff.constant,
         (RemoteDisconnected, ConnectionError, ProtocolError, HTTPError, ReadTimeout),
         max_time=60,
         interval=0.1,
-        giveup=is_final)
+        giveup=is_final,
+    )
     def api_get(self, path):
         url = urljoin(self.baseUrl, path)
         response = self.session.get(url, timeout=2)
         response.raise_for_status()
         return response.json()
 
-    @backoff.on_exception(backoff.constant,
+    @backoff.on_exception(
+        backoff.constant,
         (RemoteDisconnected, ConnectionError, ProtocolError, HTTPError, ReadTimeout),
         max_time=60,
-	interval=0.1,
-        giveup=is_final)
+        interval=0.1,
+        giveup=is_final,
+    )
     def api_post(self, path, data=None):
         url = urljoin(self.baseUrl, path)
         response = self.session.post(url, data=data, timeout=2)
@@ -74,7 +76,7 @@ class Lichess():
         return self.api_post(ENDPOINTS["move"].format(game_id, move))
 
     def chat(self, game_id, room, text):
-        payload = {'room': room, 'text': text}
+        payload = {"room": room, "text": text}
         return self.api_post(ENDPOINTS["chat"].format(game_id), data=payload)
 
     def abort(self, game_id):
