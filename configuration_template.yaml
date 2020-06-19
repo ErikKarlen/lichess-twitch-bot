@@ -1,0 +1,5 @@
+---
+# Configuration Template for Lichess Twitch Bot
+twitch:
+  client_id: <TWITCH CLIENT ID> # input client id
+  token: <TWITCH TOKEN> # input token
