@@ -10,21 +10,19 @@ Some code in this file is licensed under the Apache License, Version 2.0.
 lichess_twitch_bot.py
 """
 
-from irc.bot import SingleServerIRCBot
+import logging
 from requests import get
-
-NAME = "NaitMareBot"
-OWNER = "naitmare"
+from irc.bot import SingleServerIRCBot
 
 
 class LichessTwitchBot(SingleServerIRCBot):
-    def __init__(self, client_id, token):
+    def __init__(self, username, owner, client_id, token):
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
-        self.USERNAME = NAME.lower()
+        self.USERNAME = username.lower()
         self.CLIENT_ID = client_id
         self.TOKEN = token
-        self.CHANNEL = f"#{OWNER}"
+        self.CHANNEL = f"#{owner.lower()}"
 
         url = f"https://api.twitch.tv/kraken/users?login={self.USERNAME}"
         headers = {

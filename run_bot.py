@@ -45,8 +45,13 @@ def main(main_args):
     args = parse_args(main_args)
     configuration = load_configuration(args.configuration)
 
+    username = configuration["twitch"]["username"]
+    owner = configuration["twitch"]["owner"]
+    client_id = configuration["twitch"]["client_id"]
+    token = configuration["twitch"]["token"]
+
     # Start bot
-    bot = LichessTwitchBot(configuration["twitch"]["client_id"], configuration["twitch"]["token"])
+    bot = LichessTwitchBot(username, owner, client_id, token)
     bot.start()
 
 
