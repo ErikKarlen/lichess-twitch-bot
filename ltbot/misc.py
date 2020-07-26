@@ -9,6 +9,9 @@ import yaml
 from pathlib import Path
 
 
+LOG = logging.getLogger(f"{__name__}")
+
+# Logging constants
 LOGGING_FILENAME = "ltbot"
 LOGGING_NAME_LENGTH = 30
 
@@ -23,8 +26,6 @@ def load_configuration(configuration_file):
             configuration = yaml.safe_load(configuration_stream)
         except yaml.YAMLError as exc:
             print(exc)
-
-    LOG.debug("Loaded configuration")
 
     return configuration
 
@@ -53,5 +54,7 @@ def setup_logging(logging_level):
     else:
         console_level = logging.ERROR
     console.setLevel(console_level)
-    console.setFormatter(logging.Formatter(f"%(name)-{LOGGING_NAME_LENGTH}s: %(levelname)-8s %(message)s"))
+    console.setFormatter(
+        logging.Formatter(f"%(name)-{LOGGING_NAME_LENGTH}s: %(levelname)-8s %(message)s")
+    )
     logging.getLogger("").addHandler(console)
