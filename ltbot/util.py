@@ -1,8 +1,8 @@
-""" Miscellaneous
+""" Utilities
 
-Miscellaneous functions and constants.
+Utility functions and definitions.
 
-misc.py
+util.py
 """
 import logging
 import yaml
