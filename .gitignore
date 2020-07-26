@@ -3,5 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Editor and IDE related files
+.vscode/
+
 # Package specific files
 my_config.yaml
