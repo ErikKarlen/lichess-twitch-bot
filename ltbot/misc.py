@@ -25,7 +25,10 @@ def load_configuration(configuration_file):
         try:
             configuration = yaml.safe_load(configuration_stream)
         except yaml.YAMLError as exc:
-            print(exc)
+            LOG.error("Failed to load configuration file")
+            raise exc
+    
+    LOG.debug("configuration loaded")
 
     return configuration
 
@@ -37,7 +40,7 @@ def setup_logging(logging_level):
     # Logging to file
     logging.basicConfig(
         level=logging.DEBUG,
-        format=f"%(asctime)s %(name)-{LOGGING_NAME_LENGTH}s %(levelname)-8s %(message)s",
+        format=f"%(asctime)s %(name)-{LOGGING_NAME_LENGTH}s [%(levelname)-8s] %(message)s",
         datefmt="%y-%m-%d %H:%M",
         filename=f"{LOGGING_FILENAME}.log",
         filemode="w",
@@ -55,6 +58,8 @@ def setup_logging(logging_level):
         console_level = logging.ERROR
     console.setLevel(console_level)
     console.setFormatter(
-        logging.Formatter(f"%(name)-{LOGGING_NAME_LENGTH}s: %(levelname)-8s %(message)s")
+        logging.Formatter(f"%(name)-{LOGGING_NAME_LENGTH}s: [%(levelname)-8s] %(message)s")
     )
     logging.getLogger("").addHandler(console)
+
+    LOG.debug("logging setup")

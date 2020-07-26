@@ -35,21 +35,19 @@ class LichessTwitchBot(SingleServerIRCBot):
         }
         resp = get(url, headers=headers).json()
         self.channel_id = resp["users"][0]["_id"]
-        LOG.debug("init 1 finished")
 
         super().__init__(
             [(self.HOST, self.PORT, f"oauth:{self.TOKEN}")], self.USERNAME, self.USERNAME,
         )
-        LOG.debug("init 2 finished")
+        LOG.debug("ltbot initialized")
 
     def on_welcome(self, cxn, event):
         for req in ("membership", "tags", "commands"):
             cxn.cap("REQ", f":twitch.tv/{req}")
-        LOG.debug("welcome finished")
 
         cxn.join(self.CHANNEL)
-        LOG.debug("joined channel")
         self.send_message("Now online.")
+        LOG.info(f"Connected to twitch channel {self.CHANNEL[1:]}.")
 
     def on_pubmsg(self, cxn, event):
         tags = {kvpair["key"]: kvpair["value"] for kvpair in event.tags}

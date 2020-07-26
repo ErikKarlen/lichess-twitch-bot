@@ -32,6 +32,8 @@ def parse_args(main_args):
     )
     args = parser.parse_args(main_args[1:])
 
+    LOG.debug("arguments parsed")
+
     return args
 
 
@@ -51,6 +53,8 @@ def main(main_args):
 
     # Start bot
     bot = LichessTwitchBot(username, owner, client_id, token)
+
+    LOG.debug("starting ltbot")
     bot.start()
 
 
