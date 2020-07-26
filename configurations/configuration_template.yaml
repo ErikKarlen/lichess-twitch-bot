@@ -1,0 +1,7 @@
+---
+# Configuration Template for Lichess Twitch Bot
+twitch:
+  username: <BOT USERNAME>
+  owner: <BOT OWNER>
+  client_id: <CLIENT ID>
+  token: <TOKEN>

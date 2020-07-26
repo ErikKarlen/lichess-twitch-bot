@@ -15,7 +15,8 @@ from requests import get
 from pathlib import Path
 from irc.bot import SingleServerIRCBot
 
-LOG = logging.getLogger(f"tlb.{Path(__file__).stem}")
+
+LOG = logging.getLogger(f"{__name__}")
 
 
 class LichessTwitchBot(SingleServerIRCBot):
