@@ -16,7 +16,7 @@ from pathlib import Path
 from irc.bot import SingleServerIRCBot
 
 
-LOG = logging.getLogger(f"{__name__}")
+LOG = logging.getLogger(__name__)
 
 
 class LichessTwitchBot(SingleServerIRCBot):
@@ -47,7 +47,7 @@ class LichessTwitchBot(SingleServerIRCBot):
 
         cxn.join(self.CHANNEL)
         self.send_message("Now online.")
-        LOG.info(f"Connected to twitch channel {self.CHANNEL[1:]}.")
+        LOG.info(f"Connected user {self.USERNAME} to twitch channel {self.CHANNEL[1:]}.")
 
     def on_pubmsg(self, cxn, event):
         tags = {kvpair["key"]: kvpair["value"] for kvpair in event.tags}

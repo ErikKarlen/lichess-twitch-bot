@@ -9,7 +9,7 @@ import yaml
 from pathlib import Path
 
 
-LOG = logging.getLogger(f"{__name__}")
+LOG = logging.getLogger(__name__)
 
 # Logging constants
 LOGGING_FILENAME = "ltbot"
@@ -27,7 +27,7 @@ def load_configuration(configuration_file):
         except yaml.YAMLError as exc:
             LOG.error("Failed to load configuration file")
             raise exc
-    
+
     LOG.debug("configuration loaded")
 
     return configuration

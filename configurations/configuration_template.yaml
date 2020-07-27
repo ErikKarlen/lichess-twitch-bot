@@ -1,7 +1,10 @@
 ---
 # Configuration Template for Lichess Twitch Bot
 twitch:
-  username: <BOT USERNAME>
-  owner: <BOT OWNER>
-  client_id: <CLIENT ID>
-  token: <TOKEN>
+  username: <TWITCH BOT USERNAME>
+  owner: <TWITCH BOT OWNER>
+  client_id: <TWITCH CLIENT ID>
+  token: <TWITCH TOKEN>
+lichess:
+  token: <LICHESS TOKEN>
+  url: https://lichess.org/
