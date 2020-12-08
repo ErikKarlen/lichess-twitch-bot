@@ -9,6 +9,7 @@ import sys
 import logging
 import argparse as ap
 from pathlib import Path
+from typing import List
 
 from ltbot import load_configuration, setup_logging
 from ltbot import LTBotManager
@@ -19,7 +20,7 @@ __version__ = "0.0.1"
 LOG = logging.getLogger(__name__)
 
 
-def parse_args(main_args):
+def parse_args(main_args: List[str]):
     """
     Parse arguments
     """
@@ -42,15 +43,18 @@ def parse_args(main_args):
     return args
 
 
-def main(main_args):
+def main(main_args: List[str]):
     """
     Main program function.
     """
     # Base setup
     args = parse_args(main_args)
     setup_logging(args.verbose)
+
+    # Configuration setup
     configuration = load_configuration(args.configuration)
 
+    # Initialize bot
     bot_manager = LTBotManager(configuration=configuration, version=__version__)
 
     # Check if Lichess account is bot
@@ -61,7 +65,6 @@ def main(main_args):
 
     # Start bot
     if lichess_is_bot:
-        LOG.debug("starting ltbot")
         bot_manager.start()
     else:
         LOG.error(

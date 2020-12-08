@@ -14,13 +14,14 @@ import logging
 from requests import get
 from pathlib import Path
 from irc.bot import SingleServerIRCBot
+from irc.client import ServerConnection, Event
 
 
 LOG = logging.getLogger(__name__)
 
 
 class LichessTwitchBot(SingleServerIRCBot):
-    def __init__(self, username, owner, client_id, token):
+    def __init__(self, username: str, owner: str, client_id: str, token: str):
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
         self.USERNAME = username.lower()
@@ -41,21 +42,30 @@ class LichessTwitchBot(SingleServerIRCBot):
         )
         LOG.debug("ltbot initialized")
 
-    def on_welcome(self, cxn, event):
+    def on_welcome(self, connection, event):
+        """
+        Callback for when connection has been established
+        """
         for req in ("membership", "tags", "commands"):
-            cxn.cap("REQ", f":twitch.tv/{req}")
+            connection.cap("REQ", f":twitch.tv/{req}")
 
-        cxn.join(self.CHANNEL)
-        self.send_message("Now online.")
+        connection.join(self.CHANNEL)
+        self.send_message("Connected")
         LOG.info(f"Connected user {self.USERNAME} to twitch channel {self.CHANNEL[1:]}.")
 
-    def on_pubmsg(self, cxn, event):
+    def on_pubmsg(self, connection: ServerConnection, event: Event):
+        """
+        Callback for when message is received
+        """
         tags = {kvpair["key"]: kvpair["value"] for kvpair in event.tags}
         user = {"name": tags["display-name"], "id": tags["user-id"]}
         message = event.arguments[0]
 
         LOG.info(f"Message from {user['name']}: {message}")
 
-    def send_message(self, message):
-        LOG.debug("sending message")
+    def send_message(self, message: str):
+        """
+        Sends message to chat
+        """
+        LOG.debug("Sending message")
         self.connection.privmsg(self.CHANNEL, message)

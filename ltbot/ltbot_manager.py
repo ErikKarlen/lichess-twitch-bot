@@ -33,6 +33,9 @@ class LTBotManager:
         LOG.info("Connected user {} to lichess".format(user_profile["username"]))
 
     def upgrade_lichess_account(self):
+        """
+        Upgrade Lichess account to bot account
+        """
         if self.lichess_bot.upgrade_to_bot_account() is None:
             return False
 
@@ -40,4 +43,8 @@ class LTBotManager:
         return True
 
     def start(self):
+        """
+        Start bot
+        """
+        LOG.debug("Starting bot")
         self.twitch_bot.start()
