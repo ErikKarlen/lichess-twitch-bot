@@ -48,3 +48,10 @@ class LTBotManager:
         """
         LOG.debug("Starting bot")
         self.twitch_bot.start()
+
+    def stop(self):
+        """
+        Stop bot
+        """
+        LOG.debug("Stopping bot")
+        self.twitch_bot.die()

@@ -6,6 +6,7 @@ run_bot.py
 """
 
 import sys
+import signal
 import logging
 import argparse as ap
 from pathlib import Path
@@ -18,6 +19,24 @@ from ltbot import LTBotManager
 __version__ = "0.0.1"
 
 LOG = logging.getLogger(__name__)
+
+
+def exit(bot_manager: LTBotManager):
+    """
+    Exit program
+    """
+    LOG.debug("Exiting program")
+    bot_manager.stop()
+    sys.exit()
+
+
+def signal_handler(signum: int, frame, bot_manager: LTBotManager):
+    """
+    Signal handling
+    """
+    signal_name = signal.Signals(signum).name
+    LOG.debug(f"Handling {signal_name} signal")
+    exit(bot_manager)
 
 
 def parse_args(main_args: List[str]):
@@ -56,6 +75,9 @@ def main(main_args: List[str]):
 
     # Initialize bot
     bot_manager = LTBotManager(configuration=configuration, version=__version__)
+
+    # Setup signal handling
+    signal.signal(signal.SIGINT, lambda signum, frame: signal_handler(signum, frame, bot_manager))
 
     # Check if Lichess account is bot
     user_profile = bot_manager.lichess_bot.get_profile()
