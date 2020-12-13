@@ -1,9 +1,3 @@
-""" Utilities
-
-Utility functions and definitions.
-
-util.py
-"""
 import logging
 import yaml
 from pathlib import Path
@@ -16,11 +10,27 @@ LOGGING_FILENAME = "ltbot"
 LOGGING_NAME_LENGTH = 30
 
 
-def load_configuration(configuration_file):
+def load_configuration(configuration_file: Path):
+    """Load program configuration
+
+    Loads bot configuration from yaml file returns its dict
+    representation.
+
+    Parameters
+    ----------
+    configuration_file : Path
+        Yaml file with bot configuration
+
+    Returns
+    -------
+        Dict representation of the configuration
     """
-    Load program configuration
-    """
-    configuration_path = Path(configuration_file)
+
+    # Convert to Path if it not already is
+    if not isinstance(configuration_file, Path):
+        configuration_path = Path(configuration_file)
+
+    # Load yaml configuration file
     with open(configuration_path, "r") as configuration_stream:
         try:
             configuration = yaml.safe_load(configuration_stream)
@@ -33,10 +43,17 @@ def load_configuration(configuration_file):
     return configuration
 
 
-def setup_logging(logging_level):
+def setup_logging(logging_level: int):
+    """Setup logging
+
+    Enables logging for the program.
+
+    Parameters
+    ----------
+    logging_level : int
+        The level to log for. Higher value gives more logging.
     """
-    Setup logging
-    """
+
     # Logging to file
     logging.basicConfig(
         level=logging.DEBUG,

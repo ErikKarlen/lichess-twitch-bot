@@ -1,10 +1,3 @@
-""" Lichess Twitch Bot Manager
-
-Manages Lichess and Twitch connections
-
-ltbot_manager.py
-"""
-
 import logging
 
 from . import LichessTwitchBot, Lichess
@@ -14,7 +7,39 @@ LOG = logging.getLogger(__name__)
 
 
 class LTBotManager:
+    """Lichess Twitch Bot Manager
+
+    Manages Lichess and Twitch connections.
+
+    ---
+
+    Attributes
+    ----------
+    configuration : dict
+        Dictionary with Twitch and Lichess configuration
+    version : str
+        String representation of bot version
+
+    Methods
+    -------
+    upgrade_lichess_account()
+        Upgrades the connected Lichess account to bot
+    start()
+        Starts the bot
+    stop()
+        Stops the bot
+    """
+
     def __init__(self, configuration: dict, version: str):
+        """
+        Parameters
+        ----------
+        configuration : dict
+            Dictionary with Twitch and Lichess configuration
+        version : str
+            String representation of bot version
+        """
+
         self.configuration = configuration
 
         self.twitch_bot = LichessTwitchBot(
@@ -33,9 +58,14 @@ class LTBotManager:
         LOG.info("Connected user {} to lichess".format(user_profile["username"]))
 
     def upgrade_lichess_account(self):
+        """Upgrade Lichess account to bot account
+
+        Returns
+        -------
+        bool
+            Returns True if successful, otherwise False
         """
-        Upgrade Lichess account to bot account
-        """
+
         if self.lichess_bot.upgrade_to_bot_account() is None:
             return False
 
@@ -43,15 +73,19 @@ class LTBotManager:
         return True
 
     def start(self):
+        """Start bot
+
+        Starts the bot and writes to log.
         """
-        Start bot
-        """
+
         LOG.debug("Starting bot")
         self.twitch_bot.start()
 
     def stop(self):
+        """Stop bot
+
+        Stops the bot and writes to log.
         """
-        Stop bot
-        """
+
         LOG.debug("Stopping bot")
         self.twitch_bot.die()

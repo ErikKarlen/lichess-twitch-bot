@@ -1,15 +1,3 @@
-""" Lichess Twitch Bot
-
-    COPYRIGHT INFORMATION
-    ---------------------
-Based on the twitch bot tutorial by Carberra.
-    https://github.com/Carberra/twitch-bot-tutorial/blob/master/twitch_tut.py
-Some code in this file is licensed under the Apache License, Version 2.0.
-    http://aws.amazon.com/apache2.0/
-
-lichess_twitch_bot.py
-"""
-
 import logging
 from requests import get
 from pathlib import Path
@@ -21,7 +9,45 @@ LOG = logging.getLogger(__name__)
 
 
 class LichessTwitchBot(SingleServerIRCBot):
+    """A Twitch bot that can play chess on Lichess
+
+    ---
+
+    Attributes
+    ----------
+    username : str
+        Twitch user name of the Twitch bot
+    owner : str
+        Twitch user name of the channel to join
+    client_id : str
+        The Twitch bot's client id
+    token : str
+        The Twitch bot's token
+
+    Methods
+    -------
+    on_welcome(connection: ServerConnection, event: Event)
+        Callback for when the bot joins the Twitch chat
+    on_pubmsg(connection: ServerConnection, event: Event)
+        Callback for when a chat message is received in the Twitch chat
+    send_message(message: str)
+        Sends a message to the Twitch chat
+    """
+
     def __init__(self, username: str, owner: str, client_id: str, token: str):
+        """
+        Parameters
+        ----------
+        username : str
+            Twitch user name of the Twitch bot
+        owner : str
+            Twitch user name of the channel to join
+        client_id : str
+            The Twitch bot's client id
+        token : str
+            The Twitch bot's token
+        """
+
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
         self.USERNAME = username.lower()
@@ -42,10 +68,20 @@ class LichessTwitchBot(SingleServerIRCBot):
         )
         LOG.debug("ltbot initialized")
 
-    def on_welcome(self, connection, event):
+    def on_welcome(self, connection: ServerConnection, event: Event):
+        """Callback for when connection has been established
+
+        Joins the Twitch chat and sends a message to confirm
+        connection.
+
+        Parameters
+        ----------
+        connection : ServerConnection
+            Connection to Twitch server
+        event : Event
+            Event object for connection
         """
-        Callback for when connection has been established
-        """
+
         for req in ("membership", "tags", "commands"):
             connection.cap("REQ", f":twitch.tv/{req}")
 
@@ -54,9 +90,18 @@ class LichessTwitchBot(SingleServerIRCBot):
         LOG.info(f"Connected user {self.USERNAME} to twitch channel {self.CHANNEL[1:]}.")
 
     def on_pubmsg(self, connection: ServerConnection, event: Event):
+        """Callback for when message is received
+
+        Logs the received message.
+
+        Parameters
+        connection : ServerConnection
+            Connection to Twitch server
+        event : Event
+            Event object for connection
+        ----------
         """
-        Callback for when message is received
-        """
+
         tags = {kvpair["key"]: kvpair["value"] for kvpair in event.tags}
         user = {"name": tags["display-name"], "id": tags["user-id"]}
         message = event.arguments[0]
@@ -64,8 +109,15 @@ class LichessTwitchBot(SingleServerIRCBot):
         LOG.info(f"Message from {user['name']}: {message}")
 
     def send_message(self, message: str):
+        """Sends message to chat
+
+        Sends a message to chat and logs it.
+
+        Parameters
+        ----------
+        message : str
+            The message to send
         """
-        Sends message to chat
-        """
+
         LOG.debug("Sending message")
         self.connection.privmsg(self.CHANNEL, message)

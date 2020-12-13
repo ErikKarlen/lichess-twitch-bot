@@ -1,8 +1,22 @@
-""" Run Bot
+"""Run Lichess Twitch Bot
 
-Main run file for Lichess Twitch Bot.
+This script lets the user start a Twitch bot that can be used for
+controlling a Lichess account playing a game of chess.
 
-run_bot.py
+This file can als be imported as a module and contains the following
+functions:
+
+    * signal_handler - Handles signals and exits program
+    * exit - Stops the bot and exits program
+    * parse_args - Parses arguments
+    * main - Can be used for starting a Lichess Twitch Bot
+
+    COPYRIGHT INFORMATION
+    ---------------------
+Based on the twitch bot tutorial by Carberra.
+    https://github.com/Carberra/twitch-bot-tutorial/blob/master/twitch_tut.py
+Some code in this file is licensed under the Apache License, Version 2.0.
+    http://aws.amazon.com/apache2.0/
 """
 
 import sys
@@ -21,28 +35,47 @@ __version__ = "0.0.1"
 LOG = logging.getLogger(__name__)
 
 
-def exit(bot_manager: LTBotManager):
-    """
-    Exit program
-    """
-    LOG.debug("Exiting program")
-    bot_manager.stop()
-    sys.exit()
-
-
 def signal_handler(signum: int, frame, bot_manager: LTBotManager):
+    """Signal handling
+
+    Parameters
+    ----------
+    signum : int
+        Number representation of the signal received
+    frame
+        The current call frame when the signal was received
+    bot_manager : LTBotManager
+        Manager of a Lichess Twitch Bot
     """
-    Signal handling
-    """
+
     signal_name = signal.Signals(signum).name
     LOG.debug(f"Handling {signal_name} signal")
     exit(bot_manager)
 
 
+def exit(bot_manager: LTBotManager):
+    """Exit program
+
+    Parameters
+    ----------
+    bot_manager : LTBotManager
+        Manager of a Lichess Twitch Bot
+    """
+
+    LOG.debug("Exiting program")
+    bot_manager.stop()
+    sys.exit()
+
+
 def parse_args(main_args: List[str]):
+    """Parse arguments
+
+    Parameters
+    ----------
+    main_args : List[str]
+        List of arguments
     """
-    Parse arguments
-    """
+
     parser = ap.ArgumentParser(description="Starts a Lichess Twitch Bot")
     parser.add_argument("-c", "--configuration", type=str, help="configuration file", required=True)
     parser.add_argument(
@@ -63,15 +96,20 @@ def parse_args(main_args: List[str]):
 
 
 def main(main_args: List[str]):
+    """Main program function
+
+    Parameters
+    ----------
+    main_args: List[str]
+        List of arguments
     """
-    Main program function.
-    """
+
     # Base setup
     args = parse_args(main_args)
     setup_logging(args.verbose)
 
     # Configuration setup
-    configuration = load_configuration(args.configuration)
+    configuration = load_configuration(Path(args.configuration))
 
     # Initialize bot
     bot_manager = LTBotManager(configuration=configuration, version=__version__)
