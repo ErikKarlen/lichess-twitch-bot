@@ -57,7 +57,7 @@ class LTBotManager:
         user_profile = self.lichess_bot.get_profile()
         LOG.info("Connected user {} to lichess".format(user_profile["username"]))
 
-    def upgrade_lichess_account(self):
+    def upgrade_lichess_account(self) -> bool:
         """Upgrade Lichess account to bot account
 
         Returns
