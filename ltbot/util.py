@@ -27,8 +27,7 @@ def load_configuration(configuration_file: Path):
     """
 
     # Convert to Path if it not already is
-    if not isinstance(configuration_file, Path):
-        configuration_path = Path(configuration_file)
+    configuration_path = Path(configuration_file)
 
     # Load yaml configuration file
     with open(configuration_path, "r") as configuration_stream:
