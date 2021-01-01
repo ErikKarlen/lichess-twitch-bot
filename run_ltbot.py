@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import List
 
 from ltbot import load_configuration, setup_logging
-from ltbot import LTBotManager
+from ltbot import LichessTwitchBot
 
 
 __version__ = "0.0.1"
@@ -35,8 +35,10 @@ __version__ = "0.0.1"
 LOG = logging.getLogger(__name__)
 
 
-def signal_handler(signum: int, frame, bot_manager: LTBotManager):
+def signal_handler(signum: int, frame, bot: LichessTwitchBot):
     """Signal handling
+
+    Handles signals by stoping the bot and closing the program.
 
     Parameters
     ----------
@@ -50,21 +52,7 @@ def signal_handler(signum: int, frame, bot_manager: LTBotManager):
 
     signal_name = signal.Signals(signum).name
     LOG.debug(f"Handling {signal_name} signal")
-    exit(bot_manager)
-
-
-def exit(bot_manager: LTBotManager):
-    """Exit program
-
-    Parameters
-    ----------
-    bot_manager : LTBotManager
-        Manager of a Lichess Twitch Bot
-    """
-
-    LOG.debug("Exiting program")
-    bot_manager.stop()
-    sys.exit()
+    bot.stop()
 
 
 def parse_args(main_args: List[str]):
@@ -112,20 +100,20 @@ def main(main_args: List[str]):
     configuration = load_configuration(Path(args.configuration))
 
     # Initialize bot
-    bot_manager = LTBotManager(configuration=configuration, version=__version__)
+    bot = LichessTwitchBot(configuration=configuration, version=__version__)
 
     # Setup signal handling
-    signal.signal(signal.SIGINT, lambda signum, frame: signal_handler(signum, frame, bot_manager))
+    signal.signal(signal.SIGINT, lambda signum, frame: signal_handler(signum, frame, bot))
 
     # Check if Lichess account is bot
-    user_profile = bot_manager.lichess_bot.get_profile()
+    user_profile = bot.lichess_bot.get_profile()
     lichess_is_bot = user_profile.get("title") == "BOT"
     if not lichess_is_bot and args.upgrade_lichess:
-        lichess_is_bot = bot_manager.upgrade_lichess_account()
+        lichess_is_bot = bot.upgrade_lichess_account()
 
     # Start bot
     if lichess_is_bot:
-        bot_manager.start()
+        bot.start()
     else:
         LOG.error(
             "Can't start bot because {} is not a Lichess bot account".format(

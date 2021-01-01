@@ -4,6 +4,8 @@ from pathlib import Path
 from irc.bot import SingleServerIRCBot
 from irc.client import ServerConnection, Event
 
+from . import Lichess
+
 
 LOG = logging.getLogger(__name__)
 
@@ -11,49 +13,51 @@ LOG = logging.getLogger(__name__)
 class LichessTwitchBot(SingleServerIRCBot):
     """A Twitch bot that can play chess on Lichess
 
+    Manages Lichess and Twitch connections.
+
     ---
 
     Attributes
     ----------
-    username : str
-        Twitch user name of the Twitch bot
-    owner : str
-        Twitch user name of the channel to join
-    client_id : str
-        The Twitch bot's client id
-    token : str
-        The Twitch bot's token
+    configuration : dict
+        Dictionary with Twitch and Lichess configuration
+    version : str
+        String representation of bot version
 
     Methods
     -------
+    upgrade_lichess_account()
+        Upgrades the connected Lichess account to bot
     on_welcome(connection: ServerConnection, event: Event)
         Callback for when the bot joins the Twitch chat
     on_pubmsg(connection: ServerConnection, event: Event)
         Callback for when a chat message is received in the Twitch chat
     send_message(message: str)
         Sends a message to the Twitch chat
+    start()
+        Starts the bot
+    stop()
+        Stops the bot
     """
 
-    def __init__(self, username: str, owner: str, client_id: str, token: str):
+    def __init__(self, configuration: dict, version: str):
         """
         Parameters
         ----------
-        username : str
-            Twitch user name of the Twitch bot
-        owner : str
-            Twitch user name of the channel to join
-        client_id : str
-            The Twitch bot's client id
-        token : str
-            The Twitch bot's token
+        configuration : dict
+            Dictionary with Twitch and Lichess configuration
+        version : str
+            String representation of bot version
         """
+
+        self.configuration = configuration
 
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
-        self.USERNAME = username.lower()
-        self.CLIENT_ID = client_id
-        self.TOKEN = token
-        self.CHANNEL = f"#{owner.lower()}"
+        self.USERNAME = configuration["twitch"]["username"].lower()
+        self.CLIENT_ID = configuration["twitch"]["client_id"]
+        self.TOKEN = configuration["twitch"]["token"]
+        self.CHANNEL = "#{}".format(configuration["twitch"]["owner"].lower())
 
         url = f"https://api.twitch.tv/kraken/users?login={self.USERNAME}"
         headers = {
@@ -66,7 +70,31 @@ class LichessTwitchBot(SingleServerIRCBot):
         super().__init__(
             [(self.HOST, self.PORT, f"oauth:{self.TOKEN}")], self.USERNAME, self.USERNAME,
         )
+
+        self.lichess_bot = Lichess(
+            token=configuration["lichess"]["token"],
+            url=configuration["lichess"]["url"],
+            version=version,
+        )
+        user_profile = self.lichess_bot.get_profile()
+        LOG.info("Connected user {} to lichess".format(user_profile["username"]))
+
         LOG.debug("ltbot initialized")
+
+    def upgrade_lichess_account(self) -> bool:
+        """Upgrade Lichess account to bot account
+
+        Returns
+        -------
+        bool
+            Returns True if successful, otherwise False
+        """
+
+        if self.lichess_bot.upgrade_to_bot_account() is None:
+            return False
+
+        LOG.info("Succesfully upgraded Lichess account to bot")
+        return True
 
     def on_welcome(self, connection: ServerConnection, event: Event):
         """Callback for when connection has been established
@@ -121,3 +149,21 @@ class LichessTwitchBot(SingleServerIRCBot):
 
         LOG.debug("Sending message")
         self.connection.privmsg(self.CHANNEL, message)
+
+    def start(self):
+        """Start bot
+
+        Starts the bot and writes to log.
+        """
+
+        LOG.debug("Starting bot")
+        super().start()
+
+    def stop(self):
+        """Stop bot
+
+        Stops the bot and writes to log.
+        """
+
+        LOG.debug("Stopping bot")
+        self.die()
