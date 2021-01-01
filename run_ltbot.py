@@ -13,10 +13,12 @@ functions:
 
     COPYRIGHT INFORMATION
     ---------------------
-Based on the twitch bot tutorial by Carberra.
+Some code is based on the twitch bot tutorial by Carberra.
     https://github.com/Carberra/twitch-bot-tutorial/blob/master/twitch_tut.py
 Some code in this file is licensed under the Apache License, Version 2.0.
     http://aws.amazon.com/apache2.0/
+Some code comes from ShailChoksi's lichess bot which is licenced under AGPLv3.
+    https://github.com/ShailChoksi/lichess-bot
 """
 
 import sys
