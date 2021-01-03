@@ -185,54 +185,9 @@ class LichessTwitchBot(SingleServerIRCBot):
             LOG.debug("Starting Lichess challenge vote.")
             self.challenge_vote_start()
         elif message.startswith(self.clock_limit_command):
-            try:
-                new_clock_limit = int(message[len(self.clock_limit_command) :])
-                print(new_clock_limit)
-                if (
-                    self.clock_limit_limits[0] <= new_clock_limit
-                    and new_clock_limit <= self.clock_limit_limits[1]
-                    and new_clock_limit % 60 == 0
-                ):
-                    self.clock_limit = new_clock_limit
-                    LOG.info("Set new clock limit to {}.".format(self.clock_limit))
-                    self.send_message("New clock limit set to {}.".format(self.clock_limit))
-                else:
-                    LOG.info("Clock limit outside limits.")
-                    self.send_message(
-                        "Couldn't update clock limit, make sure the new value is between {} and {}.".format(
-                            self.clock_limit_limits[0], self.clock_limit_limits[1]
-                        )
-                        + " Also make sure it is divisible by 60."
-                    )
-            except:
-                LOG.exception("Failed to update clock limit.")
-                self.send_message(
-                    "Failed to update clock limit, did you use the command correctly? "
-                    "It should be {}<new clock limit>".format(self.clock_limit_command)
-                )
+            self.clock_limit_handle_message(message)
         elif message.startswith(self.clock_increment_command):
-            try:
-                new_clock_increment = int(message[len(self.clock_increment_command) :])
-                if (
-                    self.clock_increment_limits[0] <= new_clock_increment
-                    and new_clock_increment <= self.clock_increment_limits[1]
-                ):
-                    self.clock_increment = new_clock_increment
-                    LOG.info("Set new clock increment to {}.".format(self.clock_increment))
-                    self.send_message("New clock increment set to {}.".format(self.clock_increment))
-                else:
-                    LOG.info("Given clock increment outside limits.")
-                    self.send_message(
-                        "Couldn't update clock increment, make sure the new value is between {} and {}.".format(
-                            self.clock_increment_limits[0], self.clock_increment_limits[1]
-                        )
-                    )
-            except:
-                LOG.exception("Failed to update clock increment.")
-                self.send_message(
-                    "Failed to update clock increment, did you use the command correctly? "
-                    "It should be {}<new clock increment>".format(self.clock_increment_command)
-                )
+            self.handle_clock_limit_request(message)
         elif message == self.challenge_parameters_command:
             LOG.info("Challenge parameters requested from user {}".format(user))
             self.send_message(
@@ -302,6 +257,71 @@ class LichessTwitchBot(SingleServerIRCBot):
                 "No votes were registered, type {} to start a new vote.".format(
                     self.challenge_start_command
                 )
+            )
+
+    def clock_limit_handle_request(self, message: str):
+        """Handles the request to update the clock limit
+
+        Parameters
+        ----------
+        message : str
+            The user's message
+        """
+        try:
+            new_clock_limit = int(message[len(self.clock_limit_command) :])
+            print(new_clock_limit)
+            if (
+                self.clock_limit_limits[0] <= new_clock_limit
+                and new_clock_limit <= self.clock_limit_limits[1]
+                and new_clock_limit % 60 == 0
+            ):
+                self.clock_limit = new_clock_limit
+                LOG.info("Set new clock limit to {}.".format(self.clock_limit))
+                self.send_message("New clock limit set to {}.".format(self.clock_limit))
+            else:
+                LOG.info("Clock limit outside limits.")
+                self.send_message(
+                    "Couldn't update clock limit, make sure the new value is between {} and {}.".format(
+                        self.clock_limit_limits[0], self.clock_limit_limits[1]
+                    )
+                    + " Also make sure it is divisible by 60."
+                )
+        except:
+            LOG.exception("Failed to update clock limit.")
+            self.send_message(
+                "Failed to update clock limit, did you use the command correctly? "
+                "It should be {}<new clock limit>".format(self.clock_limit_command)
+            )
+    
+    def clock_increment_handle_request(self, message: str):
+        """Handles the request to update the clock increment
+
+        Parameters
+        ----------
+        message : str
+            The user's message
+        """
+        try:
+            new_clock_increment = int(message[len(self.clock_increment_command) :])
+            if (
+                self.clock_increment_limits[0] <= new_clock_increment
+                and new_clock_increment <= self.clock_increment_limits[1]
+            ):
+                self.clock_increment = new_clock_increment
+                LOG.info("Set new clock increment to {}.".format(self.clock_increment))
+                self.send_message("New clock increment set to {}.".format(self.clock_increment))
+            else:
+                LOG.info("Given clock increment outside limits.")
+                self.send_message(
+                    "Couldn't update clock increment, make sure the new value is between {} and {}.".format(
+                        self.clock_increment_limits[0], self.clock_increment_limits[1]
+                    )
+                )
+        except:
+            LOG.exception("Failed to update clock increment.")
+            self.send_message(
+                "Failed to update clock increment, did you use the command correctly? "
+                "It should be {}<new clock increment>".format(self.clock_increment_command)
             )
 
     def send_message(self, message: str):
