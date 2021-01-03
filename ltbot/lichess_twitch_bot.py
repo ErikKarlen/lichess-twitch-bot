@@ -9,6 +9,13 @@ from . import Lichess
 LOG = logging.getLogger(__name__)
 
 
+class BotState(enum.Enum):
+    IDLE = 0
+    CHALLENGE_VOTE = 1
+    WAIT_FOR_OPPONENT = 2
+    PLAY_MOVE = 3
+
+
 class LichessTwitchBot(SingleServerIRCBot):
     """A Twitch bot that can play chess on Lichess
 
@@ -79,6 +86,8 @@ class LichessTwitchBot(SingleServerIRCBot):
         )
         user_profile = self.lichess_bot.get_profile()
         LOG.info("Connected user {} to lichess".format(user_profile["username"]))
+
+        self.bot_state = BotState.IDLE
 
         LOG.debug("ltbot initialized")
 
