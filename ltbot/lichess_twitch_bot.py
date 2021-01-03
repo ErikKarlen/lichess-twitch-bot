@@ -1,6 +1,5 @@
 import logging
 from requests import get
-from pathlib import Path
 from irc.bot import SingleServerIRCBot
 from irc.client import ServerConnection, Event
 
@@ -68,7 +67,9 @@ class LichessTwitchBot(SingleServerIRCBot):
         self.channel_id = resp["users"][0]["_id"]
 
         super().__init__(
-            [(self.HOST, self.PORT, f"oauth:{self.TOKEN}")], self.USERNAME, self.USERNAME,
+            [(self.HOST, self.PORT, f"oauth:{self.TOKEN}")],
+            self.USERNAME,
+            self.USERNAME,
         )
 
         self.lichess_bot = Lichess(
@@ -120,7 +121,7 @@ class LichessTwitchBot(SingleServerIRCBot):
     def on_pubmsg(self, connection: ServerConnection, event: Event):
         """Callback for when message is received
 
-        Logs the received message.
+        Reads the message and handles it if needed.
 
         Parameters
         connection : ServerConnection
@@ -147,7 +148,7 @@ class LichessTwitchBot(SingleServerIRCBot):
             The message to send
         """
 
-        LOG.debug("Sending message")
+        LOG.debug("Sending message: {}".format(message))
         self.connection.privmsg(self.CHANNEL, message)
 
     def start(self):
