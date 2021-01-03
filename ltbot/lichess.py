@@ -21,6 +21,7 @@ ENDPOINTS = {
     "move": "/api/bot/game/{}/move/{}",
     "chat": "/api/bot/game/{}/chat",
     "abort": "/api/bot/game/{}/abort",
+    "challenge": "/api/challenge/{}",
     "accept": "/api/challenge/{}/accept",
     "decline": "/api/challenge/{}/decline",
     "upgrade": "/api/bot/account/upgrade",
@@ -89,6 +90,10 @@ class Lichess:
     def get_game_stream(self, game_id):
         url = urljoin(self.baseUrl, ENDPOINTS["stream"].format(game_id))
         return requests.get(url, headers=self.header, stream=True)
+
+    def create_challenge(self, username, clock_limit=None, clock_increment=None):
+        payload = { "clock.limit": clock_limit, "clock.increment": clock_increment }
+        return self.api_post(ENDPOINTS["challenge"].format(username), data=payload)
 
     def accept_challenge(self, challenge_id):
         return self.api_post(ENDPOINTS["accept"].format(challenge_id))
