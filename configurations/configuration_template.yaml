@@ -5,6 +5,17 @@ twitch:
   owner: <TWITCH BOT OWNER>
   client_id: <TWITCH CLIENT ID>
   token: <TWITCH TOKEN>
+
 lichess:
   token: <LICHESS TOKEN>
   url: https://lichess.org/
+  initial_clock_limit: 600
+  initial_clock_increment: 0
+
+challenge_vote_time: 10
+command:
+  challenge_parameters: "!parameters"
+  challenge_vote: "!vote"
+  challenge_start: "!challenge"
+  clock_limit: "!clocklimit"
+  clock_increment: "!clockincrement"

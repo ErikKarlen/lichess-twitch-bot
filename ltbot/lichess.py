@@ -92,7 +92,7 @@ class Lichess:
         return requests.get(url, headers=self.header, stream=True)
 
     def create_challenge(self, username, clock_limit=None, clock_increment=None):
-        payload = { "clock.limit": clock_limit, "clock.increment": clock_increment }
+        payload = {"clock.limit": clock_limit, "clock.increment": clock_increment}
         return self.api_post(ENDPOINTS["challenge"].format(username), data=payload)
 
     def accept_challenge(self, challenge_id):
