@@ -85,13 +85,13 @@ class Lichess:
 
     def get_event_stream(self):
         url = urljoin(self.baseUrl, ENDPOINTS["stream_event"])
-        return requests.get(url, headers=self.header, stream=True)
+        return requests.get(url, headers=self.header, stream=True, timeout=10)
 
     def get_game_stream(self, game_id):
         url = urljoin(self.baseUrl, ENDPOINTS["stream"].format(game_id))
         return requests.get(url, headers=self.header, stream=True)
 
-    def create_challenge(self, username, clock_limit=None, clock_increment=None):
+    def create_challenge(self, username, clock_limit=600, clock_increment=0):
         payload = {"clock.limit": clock_limit, "clock.increment": clock_increment}
         return self.api_post(ENDPOINTS["challenge"].format(username), data=payload)
 

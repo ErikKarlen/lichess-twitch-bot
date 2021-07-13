@@ -177,7 +177,10 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config, 
     # Initial response of stream will be the full game info. Store it
     initial_state = json.loads(next(lines).decode("utf-8"))
     game = model.Game(
-        initial_state, user_profile["username"], li.baseUrl, config.get("abort_time", 20),
+        initial_state,
+        user_profile["username"],
+        li.baseUrl,
+        config.get("abort_time", 20),
     )
     board = setup_board(game)
     engine = engine_factory(board)
@@ -356,11 +359,13 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config, 
                         deferredFirstMove = False
                 if board.turn == chess.WHITE:
                     game.ping(
-                        config.get("abort_time", 20), (upd["wtime"] + upd["winc"]) / 1000 + 60,
+                        config.get("abort_time", 20),
+                        (upd["wtime"] + upd["winc"]) / 1000 + 60,
                     )
                 else:
                     game.ping(
-                        config.get("abort_time", 20), (upd["btime"] + upd["binc"]) / 1000 + 60,
+                        config.get("abort_time", 20),
+                        (upd["btime"] + upd["binc"]) / 1000 + 60,
                     )
             elif u_type == "ping":
                 if game.should_abort_now():
@@ -499,10 +504,14 @@ def intro():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Play on Lichess with a bot")
     parser.add_argument(
-        "-u", action="store_true", help="Add this flag to upgrade your account to a bot account.",
+        "-u",
+        action="store_true",
+        help="Add this flag to upgrade your account to a bot account.",
     )
     parser.add_argument(
-        "-v", action="store_true", help="Verbose output. Changes log level from INFO to DEBUG.",
+        "-v",
+        action="store_true",
+        help="Verbose output. Changes log level from INFO to DEBUG.",
     )
     parser.add_argument("--config", help="Specify a configuration file (defaults to ./config.yml)")
     parser.add_argument("-l", "--logfile", help="Log file to append logs to.", default=None)

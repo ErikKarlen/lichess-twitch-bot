@@ -1,5 +1,6 @@
 import collections
 import enum
+import json
 import logging
 import threading
 
@@ -106,6 +107,7 @@ class LichessTwitchBot(SingleServerIRCBot):
 
         self.vote_dict = {}
         self.bot_state = BotState.IDLE
+        self.challenge_id = None
 
         LOG.debug("ltbot initialized")
 
@@ -166,6 +168,10 @@ class LichessTwitchBot(SingleServerIRCBot):
             self.idle_handle_message(user["name"], message)
         elif self.bot_state == BotState.CHALLENGE_VOTE:
             self.challenge_vote_handle_message(user["name"], message)
+        elif self.bot_state == BotState.WAIT_FOR_OPPONENT:
+            LOG.info("WAIT_FOR_OPPONENT")
+        elif self.bot_state == BotState.PLAY_MOVE:
+            LOG.info("PLAY_MOVE")
 
         LOG.info(f"Message from {user['name']}: {message}")
 
@@ -181,13 +187,15 @@ class LichessTwitchBot(SingleServerIRCBot):
         """
 
         if message == self.challenge_start_command:
-            self.bot_state = BotState.CHALLENGE_VOTE
+            # print("game id: ", self.lichess_bot.create_challenge("erik1993", 660, 10)["challenge"]["id"])
+            # self.challenge_response_handle()
+            # self.bot_state = BotState.CHALLENGE_VOTE
             LOG.debug("Starting Lichess challenge vote.")
             self.challenge_vote_start()
         elif message.startswith(self.clock_limit_command):
-            self.clock_limit_handle_message(message)
+            self.clock_limit_handle_request(message)
         elif message.startswith(self.clock_increment_command):
-            self.handle_clock_limit_request(message)
+            self.clock_increment_handle_request(message)
         elif message == self.challenge_parameters_command:
             LOG.info("Challenge parameters requested from user {}".format(user))
             self.send_message(
@@ -241,20 +249,59 @@ class LichessTwitchBot(SingleServerIRCBot):
         Stops accepting votes for who to challenge and finds out who won. Announces the
         results in Twitch chat.
         """
+
         LOG.info("Challenge vote finished.")
         if len(self.vote_dict) > 0:
             winner, count = collections.Counter(self.vote_dict.values()).most_common(1)[0]
             LOG.info("Winner is {} with {} vote(s).".format(winner, count))
             self.bot_state = BotState.WAIT_FOR_OPPONENT
-            self.lichess_bot.create_challenge(winner, self.clock_limit, self.clock_increment)
+            response = self.lichess_bot.create_challenge(
+                winner, self.clock_limit, self.clock_increment
+            )
+            self.challenge_id = response["challenge"]["id"]
             self.send_message(
                 "Challenged {} to a game on Lichess, waiting for answer.".format(winner)
             )
+            self.challenge_response_handle()
         else:
             self.bot_state = BotState.IDLE
             LOG.info("No votes for who to challenge, bot will idle.")
             self.send_message(
                 "No votes were registered, type {} to start a new vote.".format(
+                    self.challenge_start_command
+                )
+            )
+
+    def challenge_response_handle(self):
+        """Handles the response from the challenged Lichess user"""
+
+        response = self.lichess_bot.get_event_stream()
+        print(response.text)
+        response_deserialized = json.loads(next(response.iter_lines()))
+        print(response_deserialized)
+        if response_deserialized["type"] == "gameStart":
+            # Challenge accepted
+            self.challenge_id = response_deserialized["game"]["id"]
+            response = self.lichess_bot.get_game_stream(self.challenge_id)
+            lines = response.iter_lines()
+            line = next(lines)
+            response_deserialized = json.loads(line)
+            print(response_deserialized)
+        elif response_deserialized["type"] == "challengeDeclined":
+            # Challenge declined
+            dest_user = response_deserialized["challenge"]["destUser"]["id"]
+            LOG.info("User {} declined the challenge, idling bot.".format(dest_user))
+            self.bot_state = BotState.IDLE
+            self.send_message(
+                "Challenged user {} declined the challenge, type {} to start a new challenge.".format(
+                    dest_user, self.challenge_start_command
+                )
+            )
+        else:
+            # Challenged timed out
+            LOG.info("Challenge timed out.")
+            self.send_message(
+                "No response from challenged user, type {} to start a new challenge.".format(
                     self.challenge_start_command
                 )
             )
@@ -267,13 +314,14 @@ class LichessTwitchBot(SingleServerIRCBot):
         message : str
             The user's message
         """
+
         try:
             new_clock_limit = int(message[len(self.clock_limit_command) :])
             print(new_clock_limit)
             if (
                 self.clock_limit_limits[0] <= new_clock_limit
                 and new_clock_limit <= self.clock_limit_limits[1]
-                and new_clock_limit % 60 == 0
+                and (new_clock_limit % 60 == 0 or new_clock_limit in [15, 30, 45, 90])
             ):
                 self.clock_limit = new_clock_limit
                 LOG.info("Set new clock limit to {}.".format(self.clock_limit))
@@ -284,7 +332,7 @@ class LichessTwitchBot(SingleServerIRCBot):
                     "Couldn't update clock limit, make sure the new value is between {} and {}.".format(
                         self.clock_limit_limits[0], self.clock_limit_limits[1]
                     )
-                    + " Also make sure it is divisible by 60."
+                    + " Also make sure it is divisible by 60 or is exactly 15, 30, 45 or 90."
                 )
         except:
             LOG.exception("Failed to update clock limit.")
@@ -292,7 +340,7 @@ class LichessTwitchBot(SingleServerIRCBot):
                 "Failed to update clock limit, did you use the command correctly? "
                 "It should be {}<new clock limit>".format(self.clock_limit_command)
             )
-    
+
     def clock_increment_handle_request(self, message: str):
         """Handles the request to update the clock increment
 
